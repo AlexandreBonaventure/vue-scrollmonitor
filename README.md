@@ -78,7 +78,7 @@ The state is an index following this structure:
 ---
 ##### Props
 
-__id__ :String|Number
+__id__ :String|Number  
 *default: random uid*
 Id is required to keep track of each item watcher & state. You can pass your own id as long as you make sure it is unique for each ScrollItem in a ScrollContainer component.
 
