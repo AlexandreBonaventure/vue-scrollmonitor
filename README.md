@@ -50,7 +50,7 @@ To track items with ScrollItem component you'll need to wrap them in a ScrollCon
 #### ScrollContainer
 ---
 ##### Props
-__container__ :DOMElement
+__container__ :DOMElement  
 By default, ScrollContainer will listen to scroll events emitted from HTML body, but you can setup another DOM element to watch for scrolling event. [see also](https://github.com/stutrek/scrollMonitor#when-the-body-scrolls)
 
 ---
@@ -78,7 +78,7 @@ The state is an index following this structure:
 ---
 ##### Props
 
-__id__ :String|Number  
+__id__ :String|Number
 *default: random uid*
 Id is required to keep track of each item watcher & state. You can pass your own id as long as you make sure it is unique for each ScrollItem in a ScrollContainer component.
 
