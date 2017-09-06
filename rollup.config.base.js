@@ -28,8 +28,8 @@ const plugins = [
 ]
 
 const config = {
-  moduleName: 'VueScrollMonitor',
-  sourceMap: true,
+  name: 'VueScrollMonitor',
+  sourcemap: true,
   plugins: plugins
 }
 
@@ -37,7 +37,7 @@ const isProduction = process.env.NODE_ENV === `production`
 const isDevelopment = process.env.NODE_ENV === `development`
 
 if (isProduction) {
-  config.sourceMap = false
+  config.sourcemap = false
   config.plugins.push(butternut())
 }
 

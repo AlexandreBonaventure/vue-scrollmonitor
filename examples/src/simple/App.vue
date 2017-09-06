@@ -1,5 +1,5 @@
 <script>
-import { ScrollContainer, ScrollItem } from '../../src/vue-scrollmonitor.js'
+import { ScrollContainer, ScrollItem } from '../../../src/vue-scrollmonitor.js'
 export default {
   name: 'Example',
   components: {
