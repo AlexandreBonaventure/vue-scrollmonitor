@@ -4,13 +4,14 @@
   "description": "Use scrollMonitor with Vue.js",
   "author": "Alexandre Bonaventure <alex@la-bonaventure.com>",
   "scripts": {
-    "build": "run-s build:**",
-    "build:js": "cross-env NODE_ENV=production rollup -c",
     "dist": "run-s dist:**",
     "dist:umd": "cross-env NODE_ENV=production rollup -c ./rollup.config.dist.js",
     "dist:esm": "cross-env NODE_ENV=production rollup -c ./rollup.config.dist.js -f es -o ./dist/vue-scroll-monitor.esm.js",
     "dev": "cross-env NODE_ENV=development rollup -cw",
-    "build-example": "cross-env NODE_ENV=development rollup -c"
+    "build-example": "cross-env NODE_ENV=development rollup -c",
+    "test": "exit 0",
+    "version": "npm run dist && npm run build-example",
+    "release": "np --no-publish && npm publish"
   },
   "main": "./dist/vue-scroll-monitor.js",
   "module": "./dist/vue-scroll-monitor.esm.js",
