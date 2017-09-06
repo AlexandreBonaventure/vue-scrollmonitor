@@ -21,13 +21,13 @@ const config = Object.assign(baseConfig,
 const isProduction = process.env.NODE_ENV === `production`
 const isDevelopment = process.env.NODE_ENV === `development`
 
-// if (isDevelopment) {
-//   config.plugins.push(livereload())
-//   config.plugins.push(serve({
-//     contentBase: ['examples/dist/simple'],
-//     port: 8080,
-//     open: true
-//   }))
-// }
+if (isDevelopment) {
+  config.plugins.push(livereload())
+  config.plugins.push(serve({
+    contentBase: ['examples/dist/simple'],
+    port: 8080,
+    open: true
+  }))
+}
 
 export default config

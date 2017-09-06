@@ -8,7 +8,7 @@
     "dist:umd": "cross-env NODE_ENV=production rollup -c ./rollup.config.dist.js",
     "dist:esm": "cross-env NODE_ENV=production rollup -c ./rollup.config.dist.js -f es -o ./dist/vue-scroll-monitor.esm.js",
     "dev": "cross-env NODE_ENV=development rollup -cw",
-    "build-example": "cross-env NODE_ENV=development rollup -c",
+    "build-example": "rollup -c",
     "test": "exit 0",
     "version": "npm run dist && npm run build-example",
     "release": "np --no-publish && npm publish"
@@ -37,6 +37,7 @@
     "rollup-plugin-livereload": "^0.4.0",
     "rollup-plugin-node-globals": "^1.1.0",
     "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-replace": "^2.0.0",
     "rollup-plugin-serve": "^0.4.2",
     "rollup-plugin-vue": "^2.4.0",
     "rollup-watch": "^4.0.0",

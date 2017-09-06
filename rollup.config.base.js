@@ -38,7 +38,9 @@ const isDevelopment = process.env.NODE_ENV === `development`
 
 if (isProduction) {
   config.sourcemap = false
-  config.plugins.push(butternut())
+  config.plugins.push(butternut({
+    check: true,
+  }))
 }
 
 export default config
