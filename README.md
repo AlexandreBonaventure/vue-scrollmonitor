@@ -7,7 +7,8 @@ To know more : [https://github.com/stutrek/scrollMonitor](https://github.com/stu
 
 
 ### Demos
-
+[Simple example](https://htmlpreview.github.io/?https://raw.githubusercontent.com/AlexandreBonaventure/vue-scrollmonitor/dev/examples/dist/simple/index.html)
+see source : [here](https://github.com/AlexandreBonaventure/vue-scrollmonitor/tree/dev/examples/src/simple)
 
 ### Installation
 ```
