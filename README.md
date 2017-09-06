@@ -55,7 +55,7 @@ By default, ScrollContainer will listen to scroll events emitted from HTML body,
 
 ---
 ##### Events
-__change__ => Object
+__change__ => Object  
 Every time scrollMonitor updates, it will fire a change event transporting the state of tracked items (aka all ScrollItem components children of this container).
 
 One common pattern is to retrieve the state in the parent component (or register it in Vuex state for example) listening to this event. That way you can have access the state in the template easily.
@@ -78,22 +78,22 @@ The state is an index following this structure:
 ---
 ##### Props
 
-__id__ :String|Number
-*default: random uid*
+__id__ :String|Number  
+*default: random uid*  
 Id is required to keep track of each item watcher & state. You can pass your own id as long as you make sure it is unique for each ScrollItem in a ScrollContainer component.
 
-__lock__ :Boolean
-*default: false*
+__lock__ :Boolean  
+*default: false*  
 [see](https://github.com/stutrek/scrollMonitor#locking)
 
-__offset__ :Number | { top :Number, bottom :Number }
-*default: undefined*
+__offset__ :Number | { top :Number, bottom :Number }  
+*default: undefined*  
 [see](https://github.com/stutrek/scrollMonitor#locking)
 
 ---
 ##### Events
 
-__change__ => Object
+__change__ => Object  
 same as ScrollContainer but for this item.
 
 ### License
