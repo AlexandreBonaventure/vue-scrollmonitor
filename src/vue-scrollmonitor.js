@@ -2,23 +2,6 @@ import scrollMonitor from 'scrollmonitor'
 import { default as get } from 'lodash-es/get'
 import { default as set } from 'lodash-es/set'
 import { generateId } from './utils/helpers'
-import Deferred from 'promise-deferred'
-
-// const EVENTS_TO_WATCH = ['visibilityChange', 'stateChange', 'enterViewport', 'fullyEnterViewport', 'exitViewport', 'partiallyExitViewport']
-// const getAttr = (vnode) => get(vnode, 'data.attrs.scroll-watch')
-
-// const wrapWithWatcherComponent = (h, children) => {
-//   const elsToWatch = children.filter(vnode => getAttr(vnode))
-//   return elsToWatch.map((vnode) => {
-//     const { data: { attrs, on, key } } = vnode
-//     return h(ScrollWatcher, {
-//       attrs,
-//       on,
-//       key,
-//       props: { offset: getAttr(vnode), id: key },
-//     }, [vnode])
-//   })
-// }
 
 export const ScrollContainer = {
   name: 'ScrollContainer',
@@ -43,32 +26,18 @@ export const ScrollContainer = {
   },
   data: () => ({
     state: {},
-    init: false,
   }),
-  created () {
-    this.__deferredReady = new Deferred()
+  beforeMount () {
     this.$nextTick(() => {
       this.setupContainer()
-      this.__deferredReady.resolve()
     })
   },
   destroyed () {
     this.teardownWatchers()
   },
   render (h) { // TODO diff and patch watchers
-    const children = this.$slots.default
-    this.init = true
     return h('div', this.$slots.default)
   },
-  // beforeUpdate() {
-  //   this.$nextTick(() => {
-  //     console.log('refresh');
-  //     this.__deferredReady.promise.then(() => {
-  //       this._container.recalculateLocation()
-  //       this._container.update()
-  //     })
-  //   })
-  // },
   methods: {
     updateInternalState (o) {
       const {
@@ -85,29 +54,6 @@ export const ScrollContainer = {
         isInViewport,
       }
       this.$emit('change', { ...this.state })
-      // bottom
-      // container
-      // height
-      // isAboveViewport
-      // isBelowViewport
-      // isFullyInViewport
-      // isInViewport
-      // top
-
-      // bottom
-      // callbacks
-      // container
-      // height
-      // isAboveViewport
-      // isBelowViewport
-      // isFullyInViewport
-      // isInViewport
-      // locked
-      // offsets
-      // recalculateLocation
-      // top
-      // triggerCallbacks
-      // watchItem
     },
     setupContainer (children) {
       this._container = this.container
@@ -118,19 +64,13 @@ export const ScrollContainer = {
       this._scrollWatchers.map(watcher => watcher.destroy())
     },
     registerWatcher (id, el, options) {
-      // this.__deferredReady.promise.then(() => {
-        this.setupReactiveState(id)
-        const watcher = this.updateWatcher(id, el, options)
-        this.updateInternalState(watcher) // initial state update
-        // Setup global handler
-        watcher.on('stateChange', (e, o) => {
-          this.updateInternalState(o)
-        })
-
-        // Setup custom handlers
-        // const handlers = pick(on, EVENTS_TO_WATCH)
-        // Object.keys(handlers).map((key) => watcher.on(key, (e, o) => handlers[key](o)))
-      // })
+      this.setupReactiveState(id)
+      const watcher = this.updateWatcher(id, el, options)
+      this.updateInternalState(watcher) // initial state update
+      // Setup global handler
+      watcher.on('stateChange', (e, o) => {
+        this.updateInternalState(o)
+      })
       return watcher
     },
     /**
@@ -212,24 +152,17 @@ export const ScrollItem = {
       set(vNode, 'data.staticClass', mergedClassString)
     }
     return this.lock ?
-      h(
-        'div',
-        {
-          style: 'height: 0px',
-        },
-        [vNode]
-      )
+      h('div', { style: 'height: 0px' }, [vNode])
       : vNode
-    // return vNode
   },
-  beforeUpdate() {
-    if (this._scrollwatcher && this.lock) { //HACK
-      this._scrollwatcher.unlock()
-      this._scrollwatcher.recalculateLocation()
-      this._scrollwatcher.lock()
-    }
-  },
-  created () {
+  // beforeUpdate() {
+  //   if (this._scrollwatcher && this.lock) { //HACK
+  //     this._scrollwatcher.unlock()
+  //     this._scrollwatcher.recalculateLocation()
+  //     this._scrollwatcher.lock()
+  //   }
+  // },
+  beforeMount () {
     this.$nextTick(() => {
       this._scrollwatcher = this.$scrollMonitor.registerWatcher(this.id, this.$el, { offset: this.offset, lock: this.lock })
     })

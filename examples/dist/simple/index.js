@@ -2917,13 +2917,13 @@ var has = {};
 var circular = {};
 var waiting = false;
 var flushing = false;
-var index$1 = 0;
+var index = 0;
 
 /**
  * Reset the scheduler's state.
  */
 function resetSchedulerState () {
-  index$1 = queue.length = activatedChildren.length = 0;
+  index = queue.length = activatedChildren.length = 0;
   has = {};
   if (process.env.NODE_ENV !== 'production') {
     circular = {};
@@ -2950,8 +2950,8 @@ function flushSchedulerQueue () {
 
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
-  for (index$1 = 0; index$1 < queue.length; index$1++) {
-    watcher = queue[index$1];
+  for (index = 0; index < queue.length; index++) {
+    watcher = queue[index];
     id = watcher.id;
     has[id] = null;
     watcher.run();
@@ -3033,7 +3033,7 @@ function queueWatcher (watcher) {
       // if already flushing, splice the watcher based on its id
       // if already past its id, it will be run next immediately.
       var i = queue.length - 1;
-      while (i > index$1 && queue[i].id > watcher.id) {
+      while (i > index && queue[i].id > watcher.id) {
         i--;
       }
       queue.splice(i + 1, 0, watcher);
@@ -8875,435 +8875,6 @@ var generateId = function (numbers) {
   return ("_" + uniqueKey)
 };
 
-// Use the fastest possible means to execute a task in a future turn
-// of the event loop.
-
-// linked list of tasks (single, with head node)
-var head = {task: void 0, next: null};
-var tail = head;
-var flushing$1 = false;
-var requestFlush = void 0;
-var isNodeJS = false;
-
-function flush() {
-    /* jshint loopfunc: true */
-
-    while (head.next) {
-        head = head.next;
-        var task = head.task;
-        head.task = void 0;
-        var domain = head.domain;
-
-        if (domain) {
-            head.domain = void 0;
-            domain.enter();
-        }
-
-        try {
-            task();
-
-        } catch (e) {
-            if (isNodeJS) {
-                // In node, uncaught exceptions are considered fatal errors.
-                // Re-throw them synchronously to interrupt flushing!
-
-                // Ensure continuation if the uncaught exception is suppressed
-                // listening "uncaughtException" events (as domains does).
-                // Continue in next event to avoid tick recursion.
-                if (domain) {
-                    domain.exit();
-                }
-                setTimeout(flush, 0);
-                if (domain) {
-                    domain.enter();
-                }
-
-                throw e;
-
-            } else {
-                // In browsers, uncaught exceptions are not fatal.
-                // Re-throw them asynchronously to avoid slow-downs.
-                setTimeout(function() {
-                   throw e;
-                }, 0);
-            }
-        }
-
-        if (domain) {
-            domain.exit();
-        }
-    }
-
-    flushing$1 = false;
-}
-
-if (typeof process !== "undefined" && nextTick$1) {
-    // Node.js before 0.9. Note that some fake-Node environments, like the
-    // Mocha test runner, introduce a `process` global without a `nextTick`.
-    isNodeJS = true;
-
-    requestFlush = function () {
-        nextTick$1(flush);
-    };
-
-} else if (typeof setImmediate === "function") {
-    // In IE10, Node.js 0.9+, or https://github.com/NobleJS/setImmediate
-    if (typeof window !== "undefined") {
-        requestFlush = setImmediate.bind(window, flush);
-    } else {
-        requestFlush = function () {
-            setImmediate(flush);
-        };
-    }
-
-} else if (typeof MessageChannel !== "undefined") {
-    // modern browsers
-    // http://www.nonblocking.io/2011/06/windownexttick.html
-    var channel = new MessageChannel();
-    channel.port1.onmessage = flush;
-    requestFlush = function () {
-        channel.port2.postMessage(0);
-    };
-
-} else {
-    // old browsers
-    requestFlush = function () {
-        setTimeout(flush, 0);
-    };
-}
-
-function asap(task) {
-    tail = tail.next = {
-        task: task,
-        domain: isNodeJS && process.domain,
-        next: null
-    };
-
-    if (!flushing$1) {
-        flushing$1 = true;
-        requestFlush();
-    }
-}
-
-var asap_1 = asap;
-
-'use strict';
-
-
-
-var core = Promise$1;
-function Promise$1(fn) {
-  if (typeof this !== 'object') { throw new TypeError('Promises must be constructed via new') }
-  if (typeof fn !== 'function') { throw new TypeError('not a function') }
-  var state = null;
-  var value = null;
-  var deferreds = [];
-  var self = this;
-
-  this.then = function(onFulfilled, onRejected) {
-    return new self.constructor(function(resolve, reject) {
-      handle(new Handler(onFulfilled, onRejected, resolve, reject));
-    })
-  };
-
-  function handle(deferred) {
-    if (state === null) {
-      deferreds.push(deferred);
-      return
-    }
-    asap_1(function() {
-      var cb = state ? deferred.onFulfilled : deferred.onRejected;
-      if (cb === null) {
-        (state ? deferred.resolve : deferred.reject)(value);
-        return
-      }
-      var ret;
-      try {
-        ret = cb(value);
-      }
-      catch (e) {
-        deferred.reject(e);
-        return
-      }
-      deferred.resolve(ret);
-    });
-  }
-
-  function resolve(newValue) {
-    try { //Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
-      if (newValue === self) { throw new TypeError('A promise cannot be resolved with itself.') }
-      if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
-        var then = newValue.then;
-        if (typeof then === 'function') {
-          doResolve(then.bind(newValue), resolve, reject);
-          return
-        }
-      }
-      state = true;
-      value = newValue;
-      finale();
-    } catch (e) { reject(e); }
-  }
-
-  function reject(newValue) {
-    state = false;
-    value = newValue;
-    finale();
-  }
-
-  function finale() {
-    for (var i = 0, len = deferreds.length; i < len; i++)
-      { handle(deferreds[i]); }
-    deferreds = null;
-  }
-
-  doResolve(fn, resolve, reject);
-}
-
-
-function Handler(onFulfilled, onRejected, resolve, reject){
-  this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;
-  this.onRejected = typeof onRejected === 'function' ? onRejected : null;
-  this.resolve = resolve;
-  this.reject = reject;
-}
-
-/**
- * Take a potentially misbehaving resolver function and make sure
- * onFulfilled and onRejected are only called once.
- *
- * Makes no guarantees about asynchrony.
- */
-function doResolve(fn, onFulfilled, onRejected) {
-  var done = false;
-  try {
-    fn(function (value) {
-      if (done) { return }
-      done = true;
-      onFulfilled(value);
-    }, function (reason) {
-      if (done) { return }
-      done = true;
-      onRejected(reason);
-    });
-  } catch (ex) {
-    if (done) { return }
-    done = true;
-    onRejected(ex);
-  }
-}
-
-'use strict';
-
-
-
-
-core.prototype.done = function (onFulfilled, onRejected) {
-  var self = arguments.length ? this.then.apply(this, arguments) : this;
-  self.then(null, function (err) {
-    asap_1(function () {
-      throw err
-    });
-  });
-};
-
-'use strict';
-
-/* Static Functions */
-
-function ValuePromise(value) {
-  this.then = function (onFulfilled) {
-    if (typeof onFulfilled !== 'function') { return this }
-    return new core(function (resolve, reject) {
-      asap_1(function () {
-        try {
-          resolve(onFulfilled(value));
-        } catch (ex) {
-          reject(ex);
-        }
-      });
-    })
-  };
-}
-ValuePromise.prototype = core.prototype;
-
-var TRUE = new ValuePromise(true);
-var FALSE = new ValuePromise(false);
-var NULL = new ValuePromise(null);
-var UNDEFINED = new ValuePromise(undefined);
-var ZERO = new ValuePromise(0);
-var EMPTYSTRING = new ValuePromise('');
-
-core.resolve = function (value) {
-  if (value instanceof core) { return value }
-
-  if (value === null) { return NULL }
-  if (value === undefined) { return UNDEFINED }
-  if (value === true) { return TRUE }
-  if (value === false) { return FALSE }
-  if (value === 0) { return ZERO }
-  if (value === '') { return EMPTYSTRING }
-
-  if (typeof value === 'object' || typeof value === 'function') {
-    try {
-      var then = value.then;
-      if (typeof then === 'function') {
-        return new core(then.bind(value))
-      }
-    } catch (ex) {
-      return new core(function (resolve, reject) {
-        reject(ex);
-      })
-    }
-  }
-
-  return new ValuePromise(value)
-};
-
-core.all = function (arr) {
-  var args = Array.prototype.slice.call(arr);
-
-  return new core(function (resolve, reject) {
-    if (args.length === 0) { return resolve([]) }
-    var remaining = args.length;
-    function res(i, val) {
-      try {
-        if (val && (typeof val === 'object' || typeof val === 'function')) {
-          var then = val.then;
-          if (typeof then === 'function') {
-            then.call(val, function (val) { res(i, val); }, reject);
-            return
-          }
-        }
-        args[i] = val;
-        if (--remaining === 0) {
-          resolve(args);
-        }
-      } catch (ex) {
-        reject(ex);
-      }
-    }
-    for (var i = 0; i < args.length; i++) {
-      res(i, args[i]);
-    }
-  })
-};
-
-core.reject = function (value) {
-  return new core(function (resolve, reject) { 
-    reject(value);
-  });
-};
-
-core.race = function (values) {
-  return new core(function (resolve, reject) { 
-    values.forEach(function(value){
-      core.resolve(value).then(resolve, reject);
-    });
-  });
-};
-
-/* Prototype Methods */
-
-core.prototype['catch'] = function (onRejected) {
-  return this.then(null, onRejected);
-};
-
-'use strict';
-
-/* Static Functions */
-
-core.denodeify = function (fn, argumentCount) {
-  argumentCount = argumentCount || Infinity;
-  return function () {
-    var self = this;
-    var args = Array.prototype.slice.call(arguments);
-    return new core(function (resolve, reject) {
-      while (args.length && args.length > argumentCount) {
-        args.pop();
-      }
-      args.push(function (err, res) {
-        if (err) { reject(err); }
-        else { resolve(res); }
-      });
-      var res = fn.apply(self, args);
-      if (res && (typeof res === 'object' || typeof res === 'function') && typeof res.then === 'function') {
-        resolve(res);
-      }
-    })
-  }
-};
-core.nodeify = function (fn) {
-  return function () {
-    var args = Array.prototype.slice.call(arguments);
-    var callback = typeof args[args.length - 1] === 'function' ? args.pop() : null;
-    var ctx = this;
-    try {
-      return fn.apply(this, arguments).nodeify(callback, ctx)
-    } catch (ex) {
-      if (callback === null || typeof callback == 'undefined') {
-        return new core(function (resolve, reject) { reject(ex); })
-      } else {
-        asap_1(function () {
-          callback.call(ctx, ex);
-        });
-      }
-    }
-  }
-};
-
-core.prototype.nodeify = function (callback, ctx) {
-  if (typeof callback != 'function') { return this }
-
-  this.then(function (value) {
-    asap_1(function () {
-      callback.call(ctx, null, value);
-    });
-  }, function (err) {
-    asap_1(function () {
-      callback.call(ctx, err);
-    });
-  });
-};
-
-'use strict';
-
-var index$3 = core;
-
-'use strict';
-
-
-
-var Deferred = function Deferred() {
-	if (!(this instanceof Deferred)) { return new Deferred(); }
-
-	var self = this;
-	self.promise = new index$3(function (resolve, reject) {
-		self.resolve = resolve;
-		self.reject = reject;
-	});
-	return self;
-};
-Deferred.Promise = index$3;
-
-var index$2 = Deferred;
-
-// const EVENTS_TO_WATCH = ['visibilityChange', 'stateChange', 'enterViewport', 'fullyEnterViewport', 'exitViewport', 'partiallyExitViewport']
-// const getAttr = (vnode) => get(vnode, 'data.attrs.scroll-watch')
-
-// const wrapWithWatcherComponent = (h, children) => {
-//   const elsToWatch = children.filter(vnode => getAttr(vnode))
-//   return elsToWatch.map((vnode) => {
-//     const { data: { attrs, on, key } } = vnode
-//     return h(ScrollWatcher, {
-//       attrs,
-//       on,
-//       key,
-//       props: { offset: getAttr(vnode), id: key },
-//     }, [vnode])
-//   })
-// }
-
 var ScrollContainer = {
   name: 'ScrollContainer',
   provide: function provide () {
@@ -9329,33 +8900,20 @@ var ScrollContainer = {
   },
   data: function () { return ({
     state: {},
-    init: false,
   }); },
-  created: function created () {
+  beforeMount: function beforeMount () {
     var this$1 = this;
 
-    this.__deferredReady = new index$2();
     this.$nextTick(function () {
       this$1.setupContainer();
-      this$1.__deferredReady.resolve();
     });
   },
   destroyed: function destroyed () {
     this.teardownWatchers();
   },
   render: function render (h) { // TODO diff and patch watchers
-    this.init = true;
     return h('div', this.$slots.default)
   },
-  // beforeUpdate() {
-  //   this.$nextTick(() => {
-  //     console.log('refresh');
-  //     this.__deferredReady.promise.then(() => {
-  //       this._container.recalculateLocation()
-  //       this._container.update()
-  //     })
-  //   })
-  // },
   methods: {
     updateInternalState: function updateInternalState (o) {
       var isAboveViewport = o.isAboveViewport;
@@ -9370,29 +8928,6 @@ var ScrollContainer = {
         isInViewport: isInViewport,
       };
       this.$emit('change', Object.assign({}, this.state));
-      // bottom
-      // container
-      // height
-      // isAboveViewport
-      // isBelowViewport
-      // isFullyInViewport
-      // isInViewport
-      // top
-
-      // bottom
-      // callbacks
-      // container
-      // height
-      // isAboveViewport
-      // isBelowViewport
-      // isFullyInViewport
-      // isInViewport
-      // locked
-      // offsets
-      // recalculateLocation
-      // top
-      // triggerCallbacks
-      // watchItem
     },
     setupContainer: function setupContainer (children) {
       this._container = this.container
@@ -9403,21 +8938,15 @@ var ScrollContainer = {
       this._scrollWatchers.map(function (watcher) { return watcher.destroy(); });
     },
     registerWatcher: function registerWatcher (id, el, options) {
-        var this$1 = this;
+      var this$1 = this;
 
-      // this.__deferredReady.promise.then(() => {
-        this.setupReactiveState(id);
-        var watcher = this.updateWatcher(id, el, options);
-        this.updateInternalState(watcher); // initial state update
-        // Setup global handler
-        watcher.on('stateChange', function (e, o) {
-          this$1.updateInternalState(o);
-        });
-
-        // Setup custom handlers
-        // const handlers = pick(on, EVENTS_TO_WATCH)
-        // Object.keys(handlers).map((key) => watcher.on(key, (e, o) => handlers[key](o)))
-      // })
+      this.setupReactiveState(id);
+      var watcher = this.updateWatcher(id, el, options);
+      this.updateInternalState(watcher); // initial state update
+      // Setup global handler
+      watcher.on('stateChange', function (e, o) {
+        this$1.updateInternalState(o);
+      });
       return watcher
     },
     /**
@@ -9513,24 +9042,17 @@ var ScrollItem = {
       set$1(vNode, 'data.staticClass', mergedClassString);
     }
     return this.lock ?
-      h(
-        'div',
-        {
-          style: 'height: 0px',
-        },
-        [vNode]
-      )
+      h('div', { style: 'height: 0px' }, [vNode])
       : vNode
-    // return vNode
   },
-  beforeUpdate: function beforeUpdate() {
-    if (this._scrollwatcher && this.lock) { //HACK
-      this._scrollwatcher.unlock();
-      this._scrollwatcher.recalculateLocation();
-      this._scrollwatcher.lock();
-    }
-  },
-  created: function created () {
+  // beforeUpdate() {
+  //   if (this._scrollwatcher && this.lock) { //HACK
+  //     this._scrollwatcher.unlock()
+  //     this._scrollwatcher.recalculateLocation()
+  //     this._scrollwatcher.lock()
+  //   }
+  // },
+  beforeMount: function beforeMount () {
     var this$1 = this;
 
     this.$nextTick(function () {

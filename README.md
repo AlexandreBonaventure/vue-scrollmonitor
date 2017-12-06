@@ -50,12 +50,12 @@ To track items with ScrollItem component you'll need to wrap them in a ScrollCon
 #### ScrollContainer
 ---
 ##### Props
-__container__ :DOMElement  
+__container__ :DOMElement
 By default, ScrollContainer will listen to scroll events emitted from HTML body, but you can setup another DOM element to watch for scrolling event. [see also](https://github.com/stutrek/scrollMonitor#when-the-body-scrolls)
 
 ---
 ##### Events
-__change__ => Object  
+__change__ => Object
 Every time scrollMonitor updates, it will fire a change event transporting the state of tracked items (aka all ScrollItem components children of this container).
 
 One common pattern is to retrieve the state in the parent component (or register it in Vuex state for example) listening to this event. That way you can have access the state in the template easily.
@@ -78,23 +78,30 @@ The state is an index following this structure:
 ---
 ##### Props
 
-__id__ :String|Number  
-*default: random uid*  
+__id__ :String|Number
+*default: random uid*
 Id is required to keep track of each item watcher & state. You can pass your own id as long as you make sure it is unique for each ScrollItem in a ScrollContainer component.
 
-__lock__ :Boolean  
-*default: false*  
+__lock__ :Boolean
+*default: false*
 [see](https://github.com/stutrek/scrollMonitor#locking)
+When lock option is set to true, your content will be wrapped in a placeholder element to allow fixed positioning to work easily.
 
-__offset__ :Number | { top :Number, bottom :Number }  
-*default: undefined*  
+__offset__ :Number | { top :Number, bottom :Number }
+*default: undefined*
 [see](https://github.com/stutrek/scrollMonitor#locking)
 
 ---
 ##### Events
 
-__change__ => Object  
+__change__ => Object
 same as ScrollContainer but for this item.
+
+---
+##### HTML classes
+
+ScrollItem will assign meaninful classes to reflect current state. It comes handy to style your elements according to its state (eg: floating sidebar)
+*possible values: isaboveviewport | isbelowviewport | isinviewport | isfullyinviewport *
 
 ### License
 
