@@ -111,7 +111,7 @@ export const ScrollContainer = {
     },
     setupContainer (children) {
       this._container = this.container
-        ? scrollMonitor.createContainer(this.$el)
+        ? scrollMonitor.createContainer(document.querySelector(this.container))
         : scrollMonitor
     },
     teardownWatchers () {
