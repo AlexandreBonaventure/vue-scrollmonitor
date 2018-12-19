@@ -11,7 +11,8 @@
     "build-example": "rollup -c",
     "test": "exit 0",
     "version": "npm run dist && npm run build-example",
-    "release": "np --no-publish && npm publish"
+    "release": "np --no-publish && npm publish",
+    "prepare": "npm run dist"
   },
   "main": "./dist/vue-scroll-monitor.js",
   "module": "./dist/vue-scroll-monitor.esm.js",
