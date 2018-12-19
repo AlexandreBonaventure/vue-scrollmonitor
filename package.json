@@ -1,6 +1,6 @@
 {
   "name": "vue-scrollmonitor",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Use scrollMonitor with Vue.js",
   "author": "Alexandre Bonaventure <alex@la-bonaventure.com>",
   "scripts": {
