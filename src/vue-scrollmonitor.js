@@ -114,6 +114,9 @@ export const ScrollContainer = {
       })
       this.$emit('change', { ...this.state })
     },
+    recalculate () {
+      if (this._container) this._container.recalculateLocations()
+    },
     log (...args) {
       if (this.debug) console.log(...args)
     },
