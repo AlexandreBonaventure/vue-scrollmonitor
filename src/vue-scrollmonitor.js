@@ -9,6 +9,7 @@ export const ScrollContainer = {
     const $scrollMonitor = {
       registerWatcher: this.registerWatcher,
       unregisterWatcher: this.unregisterWatcher,
+      updateWatcher: this.updateWatcher,
     }
     Object.defineProperty($scrollMonitor, 'state', {
       get : () => this.state,
@@ -27,10 +28,8 @@ export const ScrollContainer = {
   data: () => ({
     state: {},
   }),
-  beforeMount () {
-    this.$nextTick(() => {
-      this.setupContainer()
-    })
+  mounted () {
+	  this.setupContainer()
   },
   destroyed () {
     this.teardownWatchers()
@@ -55,10 +54,10 @@ export const ScrollContainer = {
       }
       this.$emit('change', { ...this.state })
     },
-    setupContainer (children) {
+    setupContainer () {
       this._container = this.container
-        ? scrollMonitor.createContainer(this.$el)
-        : scrollMonitor
+          ? scrollMonitor.createContainer(this.$el)
+          : scrollMonitor
     },
     teardownWatchers () {
       this._scrollWatchers.map(watcher => watcher.destroy())
@@ -115,6 +114,9 @@ export const ScrollContainer = {
       })
       this.$emit('change', { ...this.state })
     },
+    recalculate () {
+      if (this._container) this._container.recalculateLocations()
+    },
     log (...args) {
       if (this.debug) console.log(...args)
     },
@@ -162,9 +164,9 @@ export const ScrollItem = {
   //     this._scrollwatcher.lock()
   //   }
   // },
-  beforeMount () {
-    this.$nextTick(() => {
-      this._scrollwatcher = this.$scrollMonitor.registerWatcher(this.id, this.$el, { offset: this.offset, lock: this.lock })
+  mounted () {
+      this.$nextTick( function () {
+          this._scrollwatcher = this.$scrollMonitor.registerWatcher(this.id, this.$el, { offset: this.offset, lock: this.lock })
     })
   },
   destroyed () {
@@ -176,11 +178,11 @@ export const ScrollItem = {
     }
   },
   watch: {
-    lock(val) {
+    lock: function (val) {
       this.$scrollMonitor.updateWatcher(this.id, this.$el, { lock: val })
     },
     offset: {
-      handler() {
+      handler: function (val) {
         this.$scrollMonitor.updateWatcher(this.id, this.$el, { offset: val })
       },
       deep: true,
@@ -192,3 +194,4 @@ export default {
   ScrollContainer,
   ScrollItem,
 }
+
